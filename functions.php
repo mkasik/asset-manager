@@ -28,6 +28,22 @@ function ensureAccountNomineeColumn(PDO $pdo): void {
     $checked = true;
 }
 
+function ensureAiSuggestionsTable(PDO $pdo): void {
+    static $checked = false;
+    if ($checked) return;
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `ai_suggestions` (
+        `id`         int(11) NOT NULL AUTO_INCREMENT,
+        `user_id`    int(11) NOT NULL,
+        `title`      varchar(150) NOT NULL,
+        `detail`     text NOT NULL,
+        `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`),
+        KEY `user_id` (`user_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $checked = true;
+}
+
 function jsonResponse(bool $success, string $message = '', $data = null): void {
     header('Content-Type: application/json');
     echo json_encode(['success' => $success, 'message' => $message, 'data' => $data]);

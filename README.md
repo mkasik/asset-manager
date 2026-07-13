@@ -12,6 +12,7 @@ A self-hosted personal finance and investment tracking tool built with vanilla P
 - **Reports** — monthly trend charts and an investment maturity calendar
 - **Transactions** — paginated, filterable history
 - **User management** — admin-only user administration
+- **AI insights** — on-demand financial suggestions generated from account/investment/transaction summaries via the Claude API, saved per user
 
 ## Tech Stack
 
@@ -20,6 +21,7 @@ A self-hosted personal finance and investment tracking tool built with vanilla P
 - Bootstrap 5
 - Chart.js
 - Vanilla JS (AJAX, JSON endpoints under `/ajax`)
+- [Anthropic PHP SDK](https://github.com/anthropics/anthropic-sdk-php) for AI insights (optional feature)
 
 ## Architecture
 
@@ -43,6 +45,7 @@ Pages render server-side PHP and talk to `/ajax/*.php` endpoints for mutations. 
 1. Create a MySQL database.
 2. Set `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` as environment variables (or edit the defaults in `config.php`).
 3. Visit `install.php` once to create the schema and your first admin account, then delete or rename it.
+4. Optional — for AI insights: run `composer install`, set the `ANTHROPIC_API_KEY` environment variable. The feature no-ops with a clear message if either is missing.
 
 ## Screenshots
 

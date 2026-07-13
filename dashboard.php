@@ -91,6 +91,21 @@ include __DIR__ . '/includes/layout_header.php';
     </div>
 </div>
 
+<!-- ── AI Insights ── -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-wand-magic-sparkles me-2 text-primary"></i>AI ইনসাইটস</h5>
+        <button type="button" id="aiInsightsBtn" class="btn btn-sm btn-outline-primary btn-card-action">
+            <i class="fas fa-sparkles"></i> নতুন পরামর্শ নিন
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="aiInsightsList" class="row g-3">
+            <div class="col-12 text-muted fs-13" id="aiInsightsEmpty">এখনো কোনো পরামর্শ নেই — উপরের বাটনে ক্লিক করো।</div>
+        </div>
+    </div>
+</div>
+
 <!-- ── Account Balances Row ── -->
 <?php
 $chartColors = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#f43f5e','#84cc16'];
@@ -344,5 +359,54 @@ if ($accounts) {
 })();
 </script>";
 }
-$extraJs = $chartScript;
+$insightsScript = <<<'JS'
+<script>
+(function(){
+    const listEl  = document.getElementById('aiInsightsList');
+    const emptyEl = document.getElementById('aiInsightsEmpty');
+    const btn     = document.getElementById('aiInsightsBtn');
+
+    function render(suggestions) {
+        listEl.querySelectorAll('.ai-suggestion-card').forEach(el => el.remove());
+        if (!suggestions.length) {
+            emptyEl.style.display = '';
+            return;
+        }
+        emptyEl.style.display = 'none';
+        suggestions.forEach(s => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 ai-suggestion-card';
+            col.innerHTML = `<div class="p-3 h-100" style="background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+                <div class="fw-600 fs-13 mb-1"><i class="fas fa-lightbulb text-warning me-1"></i>${s.title}</div>
+                <div class="text-muted fs-13">${s.detail}</div>
+            </div>`;
+            listEl.appendChild(col);
+        });
+    }
+
+    async function loadExisting() {
+        const res = await apiPost('/ajax/insights.php?action=list', {});
+        if (res.success) render(res.data || []);
+    }
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> তৈরি হচ্ছে...';
+        const res = await apiPost('/ajax/insights.php?action=generate', {});
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sparkles"></i> নতুন পরামর্শ নিন';
+        if (res.success) {
+            showToast(res.message || 'পরামর্শ তৈরি হয়েছে।', 'success');
+            render(res.data || []);
+        } else {
+            showToast(res.message || 'কিছু ভুল হয়েছে।', 'danger');
+        }
+    });
+
+    loadExisting();
+})();
+</script>
+JS;
+
+$extraJs = $chartScript . $insightsScript;
 include __DIR__ . '/includes/layout_footer.php';
